@@ -1,1 +1,0 @@
-# Go-WebApp-CI-pipeline
