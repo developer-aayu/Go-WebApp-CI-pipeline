@@ -1,14 +1,14 @@
 pipeline {
     agent{
         docker {
-            image 'aayusharma1410/go-ci:v1'     // custom docker image
+            image 'golang:1.22'     // official docker image
             args '-v /var/run/docker.sock:/var/run/docker.sock'     // mount dockcer socket to access host's docker daemon
         }
     }
 
     environment {
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials-id'      // jenkins credential setup id
-        DOCKER_IMAGE = "aayusharma1410/go-ci:${BUILD_NUMBER}"       // for image versioning
+        FINAL_DOCKER_IMAGE = "aayusharma1410/go-ci:${BUILD_NUMBER}"       // for image versioning
     }
 
     stages{
@@ -31,6 +31,19 @@ pipeline {
             steps {
                 sh 'go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.56.2'
                 sh 'golangci-lint run'
+            }
+        }
+        stage('Build and Push Distroless Image') {
+            steps {
+                script {
+                    // Build the distroless Docker image
+                    sh 'docker build -t ${FINAL_DOCKER_IMAGE} .'
+                    
+                    // Push the distroless image to Docker Hub
+                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
+                        sh 'docker push ${FINAL_DOCKER_IMAGE}'
+                    }
+                }
             }
         }
     }
