@@ -1,7 +1,37 @@
 pipeline {
     agent{
         docker {
-            
+            image 'aayusharma1410/go-ci:v1'     // custom docker image
+            args '-v /var/run/docker.sock:/var/run/docker.sock'     // mount dockcer socket to access host's docker daemon
+        }
+    }
+
+    environment {
+        DOCKER_CREDENTIALS_ID = 'dockerhub-credentials-id'      // jenkins credential setup id
+        DOCKER_IMAGE = "aayusharma1410/go-ci:${BUILD_NUMBER}"       // for image versioning
+    }
+
+    stages{
+        stage('checkout') {
+            steps {
+                git 'https://github.com/developer-aayu/Go-WebApp-CI-pipeline.git'
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'go build -o go-web-app'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'go test -v main_test.go'
+            }
+        }
+        stage('Code Quality') {
+            steps {
+                sh 'go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.56.2'
+                sh 'golangci-lint run'
+            }
         }
     }
 }
