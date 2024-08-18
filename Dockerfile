@@ -1,36 +1,13 @@
-# Start with a base image
-FROM golang:1.22 as base
-
-# Set the working directory inside the container
+# Stage 1: Build
+FROM golang:1.22 AS builder
 WORKDIR /app
-
-# Copy the go.mod file to the working directory
-COPY go.mod ./
-
-# Download all the dependencies
-RUN go mod download
-
-# Copy the source code to the working directory
 COPY . .
-
-# Build the application and create a binary named main
 RUN go build -o main .
 
-#######################################################
-
-# Reduce the image size using multi-stage builds
-
-# Use Alpine Linux as the final base image
-FROM alpine:latest
-
-# Copy the binary from the previous stage
-COPY --from=base /app/main .
-
-# Copy the static files from the previous stage
-COPY --from=base /app/static ./static
-
-# Expose the port on which the application will run
+# Stage 2: Run (Use a more inclusive image for debugging)
+FROM debian:bookworm-slim
+COPY --from=builder /app/main /app/main
+COPY --from=builder /app/static /app/static
+WORKDIR /app
 EXPOSE 8000
-
-# Command to run the application
-CMD ["./main"]
+ENTRYPOINT ["./main"]
