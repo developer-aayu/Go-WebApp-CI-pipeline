@@ -14,7 +14,7 @@ pipeline {
     stages{
         stage('checkout') {
             steps {
-                git 'https://github.com/developer-aayu/Go-WebApp-CI-pipeline.git'
+                 git branch: 'main', url: 'https://github.com/developer-aayu/Go-WebApp-CI-pipeline.git'
             }
         }
         stage('Build') {
