@@ -47,4 +47,10 @@ pipeline {
             }
         }
     }
+    post {
+        always {
+            // Clean up Docker images
+            sh 'docker image prune -f'
+        }
+    }
 }

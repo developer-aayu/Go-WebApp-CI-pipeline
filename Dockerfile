@@ -6,7 +6,7 @@ RUN go build -o main .
 
 # Stage 2: Run (Use a more inclusive image for debugging)
 FROM debian:bookworm-slim
-COPY --from=builder /app/main /app/main
+COPY --from=builder /app/main .
 COPY --from=builder /app/static /app/static
 WORKDIR /app
 EXPOSE 8000
