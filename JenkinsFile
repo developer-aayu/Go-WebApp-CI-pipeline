@@ -1,7 +1,7 @@
 pipeline {
     agent{
         docker {
-            image 'aayusharma1410/go-ci-dev:v1'     // docker image
+            image 'aayusharma1410/go-ci:v1'     // docker image
             args '-v /var/run/docker.sock:/var/run/docker.sock'     // mount dockcer socket to access host's docker daemon
         }
     }
