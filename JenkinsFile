@@ -9,7 +9,6 @@ pipeline {
     environment {
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials-id'
         FINAL_DOCKER_IMAGE = "aayusharma1410/go-ci:${BUILD_NUMBER}"
-        GOCACHE = '/app/.cache/go-build'  // Set Go cache directory
     }
 
     stages {
