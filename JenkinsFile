@@ -1,36 +1,42 @@
 pipeline {
-    agent{
+    agent {
         docker {
-            image 'aayusharma1410/go-ci:v1'     // docker image
-            args '-v /var/run/docker.sock:/var/run/docker.sock'     // mount dockcer socket to access host's docker daemon
+            image 'aayusharma1410/go-ci:v1'   // Docker image
+            args '-v /var/run/docker.sock:/var/run/docker.sock'   // Mount Docker socket to access host's Docker daemon
         }
     }
 
     environment {
-        DOCKER_CREDENTIALS_ID = 'dockerhub-credentials-id'      // jenkins credential setup id
-        FINAL_DOCKER_IMAGE = "aayusharma1410/go-ci:${BUILD_NUMBER}"       // for image versioning
+        DOCKER_CREDENTIALS_ID = 'dockerhub-credentials-id'   // Jenkins credential setup ID
+        FINAL_DOCKER_IMAGE = "aayusharma1410/go-ci:${BUILD_NUMBER}"   // For image versioning
     }
 
-    stages{
+    stages {
         stage('checkout') {
             steps {
-                 git branch: 'main', url: 'https://github.com/developer-aayu/Go-WebApp-CI-pipeline.git'
+                git branch: 'main', url: 'https://github.com/developer-aayu/Go-WebApp-CI-pipeline.git'
+            }
+        }
+        stage('Verify Workspace Mounting') {
+            steps {
+                sh 'echo "Listing files in /app (inside container):"'
+                sh 'ls -la /app'   // Check if files are correctly mounted in /app
             }
         }
         stage('Build') {
             steps {
-                sh 'go build -o main'
+                sh 'go build -o main'   // Build the Go binary
             }
         }
         stage('Test') {
             steps {
-                sh 'go test -v main_test.go'
+                sh 'go test -v main_test.go'   // Run tests
             }
         }
         stage('Code Quality') {
             steps {
                 sh 'go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.56.2'
-                sh 'golangci-lint run'
+                sh 'golangci-lint run'   // Run code quality checks
             }
         }
         stage('Build and Push Distroless Image') {
