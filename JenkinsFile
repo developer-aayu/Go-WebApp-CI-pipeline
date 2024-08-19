@@ -1,14 +1,15 @@
 pipeline {
     agent {
         docker {
-            image 'aayusharma1410/go-ci:v1'   // Docker image
-            args '-v /var/run/docker.sock:/var/run/docker.sock'   // Mount Docker socket to access host's Docker daemon
+            image 'aayusharma1410/go-ci:v1'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
         }
     }
 
     environment {
-        DOCKER_CREDENTIALS_ID = 'dockerhub-credentials-id'   // Jenkins credential setup ID
-        FINAL_DOCKER_IMAGE = "aayusharma1410/go-ci:${BUILD_NUMBER}"   // For image versioning
+        DOCKER_CREDENTIALS_ID = 'dockerhub-credentials-id'
+        FINAL_DOCKER_IMAGE = "aayusharma1410/go-ci:${BUILD_NUMBER}"
+        GOCACHE = '/app/.cache/go-build'  // Set Go cache directory
     }
 
     stages {
@@ -20,11 +21,12 @@ pipeline {
         stage('Verify Workspace Mounting') {
             steps {
                 sh 'echo "Listing files in /app (inside container):"'
-                sh 'ls -la /app'   // Check if files are correctly mounted in /app
+                sh 'ls -la /app'
             }
         }
         stage('Build') {
             steps {
+                sh 'mkdir -p /app/.cache/go-build'  // Ensure the cache directory exists
                 sh 'go build -o main'   // Build the Go binary
             }
         }
@@ -56,7 +58,7 @@ pipeline {
     post {
         always {
             // Clean up Docker images
-            sh 'docker image prune -f'
+            sh 'docker image prune -f || true'  // Ignore errors if docker is not found
         }
     }
 }
