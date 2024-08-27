@@ -7,25 +7,25 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
+        stage('checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/developer-aayu/Go-WebApp-CI-pipeline.git'
             }
         }
         stage('Build') {
             steps {
-                sh 'go build -o main'   # Build the Go binary
+                sh 'go build -o main'   // Build the Go binary
             }
         }
         stage('Test') {
             steps {
-                sh 'go test -v main_test.go'   # Run tests
+                sh 'go test -v main_test.go'   // Run tests
             }
         }
         stage('Code Quality') {
             steps {
                 sh 'go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.56.2'
-                sh 'golangci-lint run'   # Run code quality checks
+                sh 'golangci-lint run'   // Run code quality checks
             }
         }
         stage('Build and Push Distroless Image') {
