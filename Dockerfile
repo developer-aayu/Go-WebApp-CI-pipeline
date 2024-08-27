@@ -1,10 +1,8 @@
 FROM golang:1.22
 
 WORKDIR /app
-COPY . .
 
-# Change ownership to root (if running as root)
-RUN chown -R root:root /app
+COPY . .
 
 RUN go build -o main .
 
