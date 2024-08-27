@@ -47,13 +47,38 @@ pipeline {
                 }
             }
         }
-        stage('Prune Docker Images') {
-            steps {
-                script {
-                    // Prune unused Docker images to free up space
-                    sh 'docker system prune -af'
-                }
+        
+    }
+    post {
+        always {
+            script {
+                // Prune unused Docker images to free up space
+                sh 'docker system prune -af'
             }
+        }
+        success {
+            emailext (
+                to: aayusharma0014@gmail.com,
+                subject: "Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """
+                    <p>Build was successful.</p>
+                    <p>Job: ${env.JOB_NAME}</p>
+                    <p>Build Number: ${env.BUILD_NUMBER}</p>
+                    <p>Build URL: ${env.BUILD_URL}</p>
+                """
+            )
+        }
+        failure {
+            emailext (
+                to: aayusharma0014@gmail.com,
+                subject: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: """
+                    <p>Build failed. Please check the Jenkins job for details.</p>
+                    <p>Job: ${env.JOB_NAME}</p>
+                    <p>Build Number: ${env.BUILD_NUMBER}</p>
+                    <p>Build URL: ${env.BUILD_URL}</p>
+                """
+            )
         }
     }
 }
