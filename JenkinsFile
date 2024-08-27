@@ -12,6 +12,12 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/developer-aayu/Go-WebApp-CI-pipeline.git'
             }
         }
+        stage('Verify Workspace') {
+            steps {
+                sh 'ls -la'
+                sh 'cat main_test.go'
+            }
+        }
         stage('Build') {
             steps {
                 sh 'go build -o main'   // Build the Go binary
