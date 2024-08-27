@@ -65,7 +65,8 @@ pipeline {
                     <p>Job: ${env.JOB_NAME}</p>
                     <p>Build Number: ${env.BUILD_NUMBER}</p>
                     <p>Build URL: ${env.BUILD_URL}</p>
-                """
+                """,
+                mimeType: 'text/html'
             )
         }
         failure {
@@ -77,7 +78,8 @@ pipeline {
                     <p>Job: ${env.JOB_NAME}</p>
                     <p>Build Number: ${env.BUILD_NUMBER}</p>
                     <p>Build URL: ${env.BUILD_URL}</p>
-                """
+                """,
+                mimeType: 'text/html'
             )
         }
     }
