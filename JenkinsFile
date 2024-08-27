@@ -30,8 +30,10 @@ pipeline {
         }
         stage('Code Quality') {
             steps {
-                sh 'go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.56.2'
-                sh 'golangci-lint run'   // Run code quality checks
+                sh '''
+                curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
+                golangci-lint run
+                '''   // Run code quality checks
             }
         }
         stage('Build and Push Distroless Image') {
