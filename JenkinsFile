@@ -5,6 +5,7 @@ pipeline {
     environment {
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials-id'
         FINAL_DOCKER_IMAGE = "aayusharma1410/go-ci:distroless"
+        SONARQUBE_TOKEN = 'SonarQube-go-scanner'
     }
 
     stages {
@@ -23,16 +24,18 @@ pipeline {
                 sh 'go test -v ./...'   // Run tests
             }
         }
-        stage('Code Quality') {
+        stage('SonarQube Scan') {
             steps {
                 script {
-                    def golangciLintPath = '/var/lib/jenkins/go/bin'
+                    // Running the SonarQube scanner with the configured environment variables
                     sh """
-                    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b ${golangciLintPath}
-                    export PATH=${golangciLintPath}:$PATH
-                    golangci-lint run
+                    sonar-scanner \
+                      -Dsonar.projectKey=Go-scanner-key \
+                      -Dsonar.sources=. \
+                      -Dsonar.host.url=http://localhost:9000 \
+                      -Dsonar.login=${SONARQUBE_TOKEN}
                     """
-                }   // Run code quality checks
+                }
             }
         }
         stage('Build and Push Distroless Image') {
