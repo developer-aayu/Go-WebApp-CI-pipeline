@@ -5,7 +5,6 @@ pipeline {
     environment {
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials-id'
         FINAL_DOCKER_IMAGE = "aayusharma1410/go-ci:distroless"
-        SONARQUBE_TOKEN = 'SonarQube-go-scanner'
     }
 
     stages {
@@ -30,10 +29,10 @@ pipeline {
                     // Running the SonarQube scanner with the configured environment variables
                     sh """
                     sonar-scanner \
-                      -Dsonar.projectKey=Go-scanner-key \
-                      -Dsonar.sources=. \
-                      -Dsonar.host.url=http://172.17.0.1:9000 \
-                      -Dsonar.login=${SONARQUBE_TOKEN}
+                        -Dsonar.projectKey=GO-CI-sonar-scan \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=http://localhost:9000 \
+                        -Dsonar.token=sqp_c0d813580bdf4f79c3c65712a9fe59289b77564d
                     """
                 }
             }
