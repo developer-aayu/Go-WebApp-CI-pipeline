@@ -31,7 +31,7 @@ pipeline {
                     sonar-scanner \
                         -Dsonar.projectKey=GO-CI-sonar-scan \
                         -Dsonar.sources=. \
-                        -Dsonar.host.url=http://localhost:9000 \
+                        -Dsonar.host.url=http://192.168.0.103:9000 \
                         -Dsonar.token=sqp_c0d813580bdf4f79c3c65712a9fe59289b77564d
                     """
                 }
