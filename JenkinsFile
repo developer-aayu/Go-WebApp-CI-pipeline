@@ -3,8 +3,10 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_CREDENTIALS_ID = 'dockerhub-credentials-id'
+        DOCKER_CREDENTIALS_ID = credentials('dockerhub-credentials-id')
         FINAL_DOCKER_IMAGE = "aayusharma1410/go-ci:distroless"
+        SONAR_AUTH_TOKEN = credentials('sonar-token')
+        SCANNER_HOME = tool 'SonarQube Scanner'
     }
 
     stages {
@@ -23,67 +25,66 @@ pipeline {
                 sh 'go test -v ./...'   // Run tests
             }
         }
-        stage('SonarQube Scan') {
+        stage('SonarQube Test') {
             steps {
-                script {
-                    // Running the SonarQube scanner with the configured environment variables
-                    sh """
-                    sonar-scanner \
-                        -Dsonar.projectKey=GO-CI-sonar-scan \
+                echo 'Running SonarQube analysis...'
+                withSonarQubeEnv('SonarQube Server') {
+                    sh '''
+                    ${SCANNER_HOME}/bin/sonar-scanner \
+                        -Dsonar.projectKey=test \
                         -Dsonar.sources=. \
-                        -Dsonar.host.url=http://192.168.0.103:9000 \
-                        -Dsonar.token=sqp_c0d813580bdf4f79c3c65712a9fe59289b77564d
-                    """
+                        -Dsonar.login=$SONAR_AUTH_TOKEN
+                    '''
                 }
             }
         }
-        stage('Build and Push Distroless Image') {
-            steps {
-                script {
-                    // Build the distroless Docker image
-                    sh 'docker build -t ${FINAL_DOCKER_IMAGE} .'
+        // stage('Build and Push Distroless Image') {
+        //     steps {
+        //         script {
+        //             // Build the distroless Docker image
+        //             sh 'docker build -t ${FINAL_DOCKER_IMAGE} .'
                     
-                    // Push the distroless image to Docker Hub
-                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
-                        sh 'docker push ${FINAL_DOCKER_IMAGE}'
-                    }
-                }
-            }
-        }
+        //             // Push the distroless image to Docker Hub
+        //             docker.withRegistry('https://index.docker.io/v1/', "${DOCKER_CREDENTIALS_ID}") {
+        //                 sh 'docker push ${FINAL_DOCKER_IMAGE}'
+        //             }
+        //         }
+        //     }
+        // }
         
     }
-    post {
-        always {
-            script {
-                // Prune unused Docker images to free up space
-                sh 'docker system prune -af'
-            }
-        }
-        success {
-            emailext (
-                to: 'sharmaaayu86@gmail.com',
-                subject: "Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: """
-                    <p>Build was successful.</p>
-                    <p>Job: ${env.JOB_NAME}</p>
-                    <p>Build Number: ${env.BUILD_NUMBER}</p>
-                    <p>Build URL: ${env.BUILD_URL}</p>
-                """,
-                mimeType: 'text/html'
-            )
-        }
-        failure {
-            emailext (
-                to: 'aayusharma0014@gmail.com',
-                subject: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: """
-                    <p>Build failed. Please check the Jenkins job for details.</p>
-                    <p>Job: ${env.JOB_NAME}</p>
-                    <p>Build Number: ${env.BUILD_NUMBER}</p>
-                    <p>Build URL: ${env.BUILD_URL}</p>
-                """,
-                mimeType: 'text/html'
-            )
-        }
-    }
+    // post {
+    //     always {
+    //         script {
+    //             // Prune unused Docker images to free up space
+    //             sh 'docker system prune -af'
+    //         }
+    //     }
+    //     success {
+    //         emailext (
+    //             to: 'sharmaaayu86@gmail.com',
+    //             subject: "Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+    //             body: """
+    //                 <p>Build was successful.</p>
+    //                 <p>Job: ${env.JOB_NAME}</p>
+    //                 <p>Build Number: ${env.BUILD_NUMBER}</p>
+    //                 <p>Build URL: ${env.BUILD_URL}</p>
+    //             """,
+    //             mimeType: 'text/html'
+    //         )
+    //     }
+    //     failure {
+    //         emailext (
+    //             to: 'aayusharma0014@gmail.com',
+    //             subject: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+    //             body: """
+    //                 <p>Build failed. Please check the Jenkins job for details.</p>
+    //                 <p>Job: ${env.JOB_NAME}</p>
+    //                 <p>Build Number: ${env.BUILD_NUMBER}</p>
+    //                 <p>Build URL: ${env.BUILD_URL}</p>
+    //             """,
+    //             mimeType: 'text/html'
+    //         )
+    //     }
+    // }
 }
